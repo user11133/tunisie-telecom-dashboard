@@ -32,11 +32,39 @@ def render_data_export():
                 default=st.session_state.clients['service_type'].unique()
             )
             
+            # Address filter
+            address_filter = st.multiselect(
+                "Filtrer par adresse/ville",
+                options=st.session_state.clients['address'].unique(),
+                default=st.session_state.clients['address'].unique()
+            )
+            
+            # Date filter
+            st.write("Filtrer par date d'abonnement")
+            min_date = pd.to_datetime(st.session_state.clients['subscription_date']).min().date()
+            max_date = pd.to_datetime(st.session_state.clients['subscription_date']).max().date()
+            
+            date_range = st.date_input(
+                "Plage de dates d'abonnement",
+                value=(min_date, max_date),
+                min_value=min_date,
+                max_value=max_date
+            )
+            
             # Apply filters
             filtered_clients = st.session_state.clients[
                 (st.session_state.clients['status'].isin(status_filter)) &
-                (st.session_state.clients['service_type'].isin(service_filter))
+                (st.session_state.clients['service_type'].isin(service_filter)) &
+                (st.session_state.clients['address'].isin(address_filter))
             ]
+            
+            # Apply date filter if both start and end dates are selected
+            if len(date_range) == 2:
+                start_date, end_date = date_range
+                filtered_clients = filtered_clients[
+                    (pd.to_datetime(filtered_clients['subscription_date']).dt.date >= start_date) &
+                    (pd.to_datetime(filtered_clients['subscription_date']).dt.date <= end_date)
+                ]
             
             st.write(f"{len(filtered_clients)} clients correspondants aux filtres")
             

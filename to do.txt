@@ -1,0 +1,2 @@
+-msg du succes apres ajouter/modifier/supprimer un client ou offre
+-introduction general
